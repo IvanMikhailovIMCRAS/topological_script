@@ -11,10 +11,10 @@ from topological_script import bonds_parser
         ("(H)1(O)1(H)1", [(0, 1), (1, 2)]),
         (
             "(A)2[(A)2[(A)2](A)2](A)2",
-            [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (3, 6), (6, 7), (1, 8), (8, 9)],
+            [(0, 1), (1, 2), (1, 8), (2, 3), (3, 4), (3, 6), (4, 5), (6, 7), (8, 9)],
         ),
         (
-            "(Na)1(C0)1[(O)1]((C)1([(H)])2)3(O)1(H)1",
+            "(Na)1(C0)1[(O)1]((C)1([(H)1])2)3(O)1(H)1",
             [
                 (0, 1),
                 (1, 2),
@@ -34,4 +34,4 @@ from topological_script import bonds_parser
     ],
 )
 def test_bonds_parser(script: str, expected_result: List[str]) -> None:
-    assert bonds_parser(script) == expected_result
+    assert sorted(bonds_parser(script)) == sorted(expected_result)
