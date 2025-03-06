@@ -34,7 +34,7 @@ def bonds_parser(script: str) -> List[Tuple[int, int]]:
         if el == " ":
             label = False
             continue
-        elif el in "()[]":
+        elif el in "()[]{}":
             label = False
             list_script.append(el)
         elif el.isdigit():
@@ -64,6 +64,38 @@ def bonds_parser(script: str) -> List[Tuple[int, int]]:
                     ] * int(list_script[i + 1])
                 index_br_open = None
 
+    # "opening" { and } brackets
+    index_br_open = None
+    bond_nums = set()
+    cycle_bonds = []
+    first_atoms = dict()
+    second_atoms = dict()
+    for i, symbol in enumerate(list_script):
+        if symbol == "{" and int(list_script[i + 1]) in bond_nums:
+            num_atom_second = 0
+            for j in range(i, -1, -1):
+                if list_script[j].isdigit() and list_script[j + 1] != "}":
+                    num_atom_second += int(list_script[j])
+            second_atoms[int(list_script[i + 1])] = num_atom_second
+
+        if symbol == "{" and int(list_script[i + 1]) not in bond_nums:
+            bond_nums.add(int(list_script[i + 1]))
+            num_atom_first = 0
+            for j in range(i, -1, -1):
+                if list_script[j].isdigit() and list_script[j + 1] != "}":
+                    num_atom_first += int(list_script[j])
+            first_atoms[int(list_script[i + 1])] = num_atom_first
+
+    for i in bond_nums:
+        cycle_bonds.append((first_atoms[i] - 1, second_atoms[i] - 1))
+
+    # removing {...} symbols
+    for i, symbol in enumerate(list_script):
+        if symbol == "{":
+            list_script.pop(i)
+            list_script.pop(i)
+            list_script.pop(i)
+
     # (4) adding consecutive numbers not separated by brackets
     tmp_list = [""]
     for s in list_script:
@@ -75,6 +107,8 @@ def bonds_parser(script: str) -> List[Tuple[int, int]]:
     list_script = (
         script.replace("[", "*[*").replace("]", "*]*").replace("**", "*").split("*")
     )
+    if list_script[-1] == "":
+        list_script.pop(-1)
 
     # (5) building a blob connection graph using script with square brackets
     blob_bonds = []
@@ -113,9 +147,20 @@ def bonds_parser(script: str) -> List[Tuple[int, int]]:
     for b in blob_bonds:
         bonds.append((blob[b[0]][1], blob[b[1]][0]))
 
+    if cycle_bonds:
+        bonds += cycle_bonds
+
     return sorted(bonds)
 
 
 if __name__ == "__main__":
-    print(bonds_parser("(Na)1(C0)1[(O)1]((C)1([(H)1])2)3(O)1(H)1"))
-    print(bonds_parser("(H)1(O)1(H)1"))
+    # print(bonds_parser("(Na)1(C0)1[(O)1]((C)1([(H)1])2)3(O)1(H)1"))
+    # print('bonds: ', bonds_parser("(C)1{1}(C)4(C)1{1}"))
+    # print(bonds_parser("(C)1{1}(C)4(C)1{1}[(N)1(C)1[(O)1](C)1[(O)1](O)1(H)1]"))
+    # print('bonds: ', bonds_parser("(C)1{1}(C)4(C)1{1}(C)1{2}(C)2[(C)1{3}(C)4(C)1{3}](C)2(C)1{2}"))
+    print(
+        "bonds: ",
+        bonds_parser(
+            "(C)1{1}[(O)1[(O)1](O)1]((C)1[(O)1[(O)1](O)1])4(C)1{1}[(O)1[(O)1](O)1]"
+        ),
+    )
