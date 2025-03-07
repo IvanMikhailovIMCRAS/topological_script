@@ -15,6 +15,14 @@ def types_parser(script: str) -> List[str]:
         sample: ['Na', 'C0', 'O', 'C', 'H', 'H', 'C', 'H', 'H', 'C', 'H', 'H', 'O', 'H']
     """
 
+    # removing {...} brackets
+    script = list(script)
+    for i, symbol in enumerate(script):
+        if symbol == "{":
+            script.pop(i)
+            script.pop(i)
+            script.pop(i)
+
     indexes = list()
     index_br_close = 0
     index_br_open = 0
@@ -76,4 +84,11 @@ def types_parser(script: str) -> List[str]:
 
 
 if __name__ == "__main__":
-    print(types_parser("(Na)1(C0)1[(O)1]((C)1([(H)])2)3(O)1(H)1"))
+    # print(types_parser("(Na)1(C0)1[(O)1]((C)1([(H)])2)3(O)1(H)1"))
+    # print("types: ", types_parser("(C)1{1}(C)4(C)1{1}(C)1{2}(C)2[(C)1{3}(C)4(C)1{3}](C)2(C)1{2}"))
+    print(
+        "types: ",
+        types_parser(
+            "(C)1{1}[(O)1[(O)1](O)1]((C)1[(O)1[(O)1](O)1])4(C)1{1}[(O)1[(O)1](O)1]"
+        ),
+    )
